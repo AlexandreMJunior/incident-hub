@@ -1,0 +1,36 @@
+<section aria-labelledby="dashboard-heading" [attr.aria-busy]="state().status === 'loading'">
+  <div class="page-heading">
+    <div>
+      <span class="eyebrow">VISÃO OPERACIONAL</span>
+      <h2 id="dashboard-heading">Sala de controle</h2>
+      <p>Acompanhamento de incidentes operacionais.</p>
+    </div>
+    <a class="button primary" routerLink="/incidents/new"
+      ><span aria-hidden="true">＋</span>Criar incidente</a
+    >
+  </div>
+
+  @let current = state();
+  @if (current.status === 'loading') {
+    <p role="status">Carregando indicadores...</p>
+  } @else if (current.status === 'error') {
+    <p class="error" role="alert">
+      Não foi possível carregar os indicadores. Tente recarregar a página em alguns instantes.
+    </p>
+  } @else {
+    <dl class="metrics">
+      <div class="metric card">
+        <dt>Incidentes abertos</dt>
+        <dd>{{ current.data.open_count }}<small>sem filas pendentes</small></dd>
+      </div>
+      <div class="metric card">
+        <dt>Críticos ainda não resolvidos</dt>
+        <dd>{{ current.data.critical_unresolved_count }}<small>atuação requerida</small></dd>
+      </div>
+      <div class="metric card">
+        <dt>Incidentes resolvidos</dt>
+        <dd>{{ current.data.resolved_count }}<small>fechado no turno</small></dd>
+      </div>
+    </dl>
+  }
+</section>

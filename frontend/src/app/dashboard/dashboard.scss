@@ -1,0 +1,56 @@
+:host {
+  display: block;
+}
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin: 0;
+}
+.metric {
+  position: relative;
+  padding: 20px;
+  min-height: 134px;
+}
+dt {
+  color: var(--muted);
+  font-size: 13px;
+  padding-right: 12px;
+}
+dt::after {
+  content: '';
+  position: absolute;
+  right: 20px;
+  top: 24px;
+  width: 8px;
+  height: 8px;
+  background: #5a6b82;
+  border-radius: 50%;
+}
+dd {
+  margin: 10px 0 0;
+  font-size: 34px;
+  line-height: 1.2;
+  font-weight: 600;
+}
+small {
+  display: block;
+  margin-top: 8px;
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--muted);
+}
+.metric:nth-child(2) dd {
+  color: #e91027;
+}
+.metric:nth-child(2) dt::after {
+  background: #e91027;
+}
+.metric:nth-child(3) dt::after {
+  background: #2563eb;
+}
+@media (max-width: 950px) {
+  .metrics {
+    grid-template-columns: 1fr;
+  }
+}

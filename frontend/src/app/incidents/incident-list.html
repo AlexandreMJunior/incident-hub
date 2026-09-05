@@ -1,0 +1,82 @@
+<section aria-labelledby="list-heading">
+  <div class="page-heading">
+    <div>
+      <span class="eyebrow">GESTÃO OPERACIONAL</span>
+      <h2 id="list-heading">Incidentes</h2>
+      <p>Acompanhe ocorrências, responsáveis e andamento da resolução.</p>
+    </div>
+    <a class="button primary" routerLink="/incidents/new"
+      ><span aria-hidden="true">＋</span>Criar incidente</a
+    >
+  </div>
+  <div class="card">
+    <form [formGroup]="filters" (ngSubmit)="load()" class="filters">
+      <label
+        >Status
+        <select formControlName="status">
+          <option value="">Todos</option>
+          <option value="Open">Open</option>
+          <option value="In Progress">In Progress</option>
+          <option value="Resolved">Resolved</option>
+        </select>
+      </label>
+      <label
+        >Severidade
+        <select formControlName="severity">
+          <option value="">Todas</option>
+          <option value="Low">Low</option>
+          <option value="Medium">Medium</option>
+          <option value="High">High</option>
+          <option value="Critical">Critical</option>
+        </select>
+      </label>
+      <button type="submit">Aplicar filtros</button>
+      <button class="ghost" type="button" (click)="clearFilters()">Limpar filtros</button>
+    </form>
+    @if (loading()) {
+      <p role="status">Carregando incidentes...</p>
+    } @else if (error()) {
+      <p class="error" role="alert">{{ error() }}</p>
+      <button type="button" (click)="load()">Tentar novamente</button>
+    } @else if (incidents().length === 0) {
+      <p role="status">Nenhum incidente encontrado para os filtros selecionados.</p>
+    } @else {
+      <div class="table-container">
+        <table>
+          <caption>
+            Incidentes encontrados
+            <span class="count">{{ incidents().length }}</span>
+          </caption>
+          <thead>
+            <tr>
+              <th scope="col">Título</th>
+              <th scope="col">Severidade</th>
+              <th scope="col">Responsável</th>
+              <th scope="col">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (incident of incidents(); track incident.id) {
+              <tr>
+                <td>
+                  <a [routerLink]="['/incidents', incident.id]">{{ incident.title }}</a>
+                </td>
+                <td>
+                  <span class="badge severity" [attr.data-value]="incident.severity">{{
+                    incident.severity
+                  }}</span>
+                </td>
+                <td>{{ incident.owner }}</td>
+                <td>
+                  <span class="badge status" [attr.data-value]="incident.status">{{
+                    incident.status
+                  }}</span>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</section>

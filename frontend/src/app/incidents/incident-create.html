@@ -1,0 +1,72 @@
+<section aria-labelledby="create-heading">
+  <div class="page-heading">
+    <div>
+      <span class="eyebrow">REGISTRO OPERACIONAL</span>
+      <h2 id="create-heading">Novo incidente</h2>
+      <p>Todos os campos são obrigatórios.</p>
+    </div>
+  </div>
+  <form class="card" [formGroup]="form" (ngSubmit)="submit()" novalidate>
+    <div class="card-heading"><h3>Informações do incidente</h3></div>
+    <fieldset [disabled]="saving()">
+      <legend class="sr-only">Todos os campos são obrigatórios</legend>
+      <label for="title">Título</label>
+      <input
+        id="title"
+        formControlName="title"
+        required
+        maxlength="255"
+        aria-describedby="title-error"
+      />
+      @if (form.controls.title.touched && form.controls.title.invalid) {
+        <p id="title-error" class="error">Informe um título de até 255 caracteres.</p>
+      }
+      <label for="description">Descrição</label>
+      <textarea
+        id="description"
+        formControlName="description"
+        required
+        rows="5"
+        aria-describedby="description-error"
+      ></textarea>
+      @if (form.controls.description.touched && form.controls.description.invalid) {
+        <p id="description-error" class="error">Informe a descrição.</p>
+      }
+      <label for="severity">Severidade</label>
+      <select id="severity" formControlName="severity" required aria-describedby="severity-error">
+        <option value="">Selecione</option>
+        <option value="Low">Low</option>
+        <option value="Medium">Medium</option>
+        <option value="High">High</option>
+        <option value="Critical">Critical</option>
+      </select>
+      @if (form.controls.severity.touched && form.controls.severity.invalid) {
+        <p id="severity-error" class="error">Selecione a severidade.</p>
+      }
+      <label for="owner">Responsável</label>
+      <input
+        id="owner"
+        formControlName="owner"
+        required
+        maxlength="255"
+        aria-describedby="owner-error"
+      />
+      @if (form.controls.owner.touched && form.controls.owner.invalid) {
+        <p id="owner-error" class="error">Informe um responsável de até 255 caracteres.</p>
+      }
+      <div class="form-footer">
+        <a class="button ghost" routerLink="/incidents"
+          ><span aria-hidden="true">←</span>Voltar para a lista</a
+        ><button class="primary" type="submit">
+          <span aria-hidden="true">＋</span>{{ saving() ? 'Criando...' : 'Criar incidente' }}
+        </button>
+      </div>
+    </fieldset>
+    @if (saving()) {
+      <p role="status">Salvando incidente...</p>
+    }
+    @if (error()) {
+      <p class="error" role="alert">{{ error() }}</p>
+    }
+  </form>
+</section>

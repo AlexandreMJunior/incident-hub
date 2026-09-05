@@ -1,0 +1,148 @@
+:host {
+  display: block;
+  min-height: 100vh;
+}
+.sidebar {
+  position: fixed;
+  inset: 0 auto 0 0;
+  width: 224px;
+  background: #172235;
+  color: #e7edf7;
+  display: flex;
+  flex-direction: column;
+}
+.brand {
+  height: 55px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 16px;
+  border-bottom: 1px solid #ffffff20;
+  color: inherit;
+  font-size: 15px;
+  font-weight: 650;
+  text-decoration: none;
+}
+.brand-mark {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 6px;
+  background: #2563eb;
+  color: #fff;
+  font-size: 11px;
+}
+nav {
+  display: grid;
+  gap: 4px;
+  padding: 16px 8px;
+}
+nav a {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 12px;
+  color: inherit;
+  border-radius: 6px;
+  font-size: 13px;
+  text-decoration: none;
+}
+nav a:hover {
+  background: #ffffff10;
+}
+nav a.active {
+  background: #2563eb;
+  color: white;
+}
+.shift {
+  margin-top: auto;
+  padding: 12px;
+  border-top: 1px solid #ffffff20;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 12px;
+}
+.avatar {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #f5a000;
+  color: #624100;
+  font-size: 11px;
+  font-weight: 600;
+}
+small {
+  display: block;
+  color: #94a3b8;
+  margin-top: 3px;
+  font-size: 11px;
+}
+.workspace {
+  margin-left: 224px;
+  min-width: 0;
+}
+.topbar {
+  height: 55px;
+  padding: 0 32px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--muted);
+  font-size: 13px;
+}
+.topbar .icon {
+  margin-right: 8px;
+  color: var(--text);
+}
+.separator {
+  color: #cdd8e8;
+}
+.current {
+  color: var(--text);
+}
+main {
+  padding: 28px 32px 40px;
+}
+@media (max-width: 760px) {
+  .sidebar {
+    position: static;
+    width: auto;
+  }
+  .brand {
+    height: 52px;
+  }
+  nav {
+    display: flex;
+    flex-wrap: wrap;
+    padding: 8px;
+  }
+  nav a {
+    gap: 8px;
+  }
+  .shift {
+    display: none;
+  }
+  .workspace {
+    margin-left: 0;
+  }
+  .topbar {
+    padding: 0 20px;
+  }
+  main {
+    padding: 24px 20px;
+  }
+}
+@media (max-width: 400px) {
+  nav a {
+    padding: 8px;
+    font-size: 12px;
+  }
+  main {
+    padding: 20px 12px;
+  }
+}

@@ -1,0 +1,93 @@
+<section aria-labelledby="detail-heading">
+  <div class="page-heading">
+    <div>
+      <span class="eyebrow">DETALHES DO INCIDENTE</span>
+      <h2 id="detail-heading">{{ incident()?.title || 'Detalhes do incidente' }}</h2>
+    </div>
+    <a class="button" routerLink="/incidents"><span aria-hidden="true">←</span>Voltar</a>
+  </div>
+  @if (loading()) {
+    <p role="status">Carregando incidente...</p>
+  } @else if (error()) {
+    <p class="error" role="alert">{{ error() }}</p>
+  } @else if (incident(); as item) {
+    <div class="detail-layout">
+      <div class="main-column">
+        <section class="card" aria-labelledby="summary-heading">
+          <div class="card-heading">
+            <h3 id="summary-heading">Resumo</h3>
+            <span class="badge" [attr.data-value]="item.status">{{ item.status }}</span>
+          </div>
+          <dl class="details">
+            <div class="description">
+              <dt>Descrição</dt>
+              <dd>{{ item.description }}</dd>
+            </div>
+            <div>
+              <dt>Severidade</dt>
+              <dd>
+                <span class="badge severity" [attr.data-value]="item.severity">{{
+                  item.severity
+                }}</span>
+              </dd>
+            </div>
+            <div>
+              <dt>Responsável</dt>
+              <dd>{{ item.owner }}</dd>
+            </div>
+            <div>
+              <dt>Criado em</dt>
+              <dd>{{ item.created_at | date: 'dd/MM/yyyy HH:mm:ss' }}</dd>
+            </div>
+            <div>
+              <dt>Atualizado em</dt>
+              <dd>{{ item.updated_at | date: 'dd/MM/yyyy HH:mm:ss' }}</dd>
+            </div>
+          </dl>
+        </section>
+        <section class="card" aria-labelledby="status-heading">
+          <div class="card-heading"><h3 id="status-heading">Alterar status</h3></div>
+          <form [formGroup]="statusForm" (ngSubmit)="changeStatus()">
+            <fieldset [disabled]="saving()">
+              <label for="status">Novo status</label>
+              <select id="status" [formControl]="status">
+                <option value="Open">Open</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Resolved">Resolved</option>
+              </select>
+              <button class="primary" type="submit">
+                {{ saving() ? 'Salvando...' : 'Salvar status' }}
+              </button>
+            </fieldset>
+          </form>
+          @if (statusError()) {
+            <p class="error" role="alert">{{ statusError() }}</p>
+          }
+          @if (statusMessage()) {
+            <p role="status">{{ statusMessage() }}</p>
+          }
+        </section>
+      </div>
+      <section class="card history-card" aria-labelledby="history-heading">
+        <div class="card-heading"><h3 id="history-heading">Histórico de status</h3></div>
+        @if (historyLoading()) {
+          <p role="status">Carregando histórico...</p>
+        } @else if (historyError()) {
+          <p class="error" role="alert">{{ historyError() }}</p>
+          <button type="button" (click)="loadHistory()">Tentar carregar histórico novamente</button>
+        } @else if (history().length === 0) {
+          <p>Nenhuma alteração de status registrada.</p>
+        } @else {
+          <ol class="timeline">
+            @for (entry of history().slice().reverse(); track $index) {
+              <li [attr.data-status]="entry.new_status">
+                <p>{{ entry.previous_status }} → {{ entry.new_status }}</p>
+                <time>{{ entry.changed_at | date: 'dd/MM/yyyy HH:mm:ss' }}</time>
+              </li>
+            }
+          </ol>
+        }
+      </section>
+    </div>
+  }
+</section>
