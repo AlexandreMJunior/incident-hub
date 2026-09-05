@@ -120,3 +120,15 @@ time {
     margin-top: 8px;
   }
 }
+
+.comment-fields {
+  grid-template-columns: minmax(0, 1fr);
+}
+.timeline li[data-type='comment']::before {
+  background: #167047;
+  box-shadow: 0 0 0 4px #e6f6ed;
+}
+.timeline .comment-content {
+  white-space: pre-wrap;
+  font-weight: 400;
+}

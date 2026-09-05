@@ -4,7 +4,7 @@ from unittest.mock import patch
 from django.core.management import call_command
 from django.test import TestCase
 
-from .models import Incident, IncidentStatusHistory
+from .models import Incident, IncidentComment, IncidentStatusHistory
 from .services import change_incident_status
 
 
@@ -29,6 +29,7 @@ class SeedIncidentsTests(TestCase):
             self.assertIsNotNone(incident.created_at)
             self.assertIsNotNone(incident.updated_at)
         self.assertFalse(IncidentStatusHistory.objects.exists())
+        self.assertFalse(IncidentComment.objects.exists())
 
     def test_creates_required_records_and_reports_them(self):
         output = self.run_seed()
@@ -44,6 +45,7 @@ class SeedIncidentsTests(TestCase):
         ))
         incident = Incident.objects.get(title='Payment API instability')
         change_incident_status(incident, 'In Progress')
+        IncidentComment.objects.create(incident=incident, author='Ana', content='Investigating.')
         Incident.objects.filter(pk=incident.pk).update(owner='Changed', description='Changed')
         Incident.objects.create(title='Extra', description='Extra incident', severity='Low', owner='Other')
         self.run_seed()
@@ -57,6 +59,7 @@ class SeedIncidentsTests(TestCase):
             title='Existing', description='Existing incident', severity='Low', owner='Operations',
         )
         change_incident_status(incident, 'In Progress')
+        IncidentComment.objects.create(incident=incident, author='Ana', content='Investigating.')
         with patch.object(Incident.objects, 'create', side_effect=RuntimeError('Failed')):
             with self.assertRaises(RuntimeError):
                 self.run_seed()
@@ -64,3 +67,4 @@ class SeedIncidentsTests(TestCase):
         self.assertEqual(incident.status, 'In Progress')
         self.assertEqual(Incident.objects.count(), 1)
         self.assertEqual(incident.status_history.count(), 1)
+        self.assertEqual(incident.comments.get().content, 'Investigating.')

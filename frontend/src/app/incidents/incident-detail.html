@@ -67,22 +67,51 @@
             <p role="status">{{ statusMessage() }}</p>
           }
         </section>
+        <section class="card" aria-labelledby="comment-heading">
+          <div class="card-heading"><h3 id="comment-heading">Adicionar comentário</h3></div>
+          <form [formGroup]="commentForm" (ngSubmit)="addComment()" novalidate>
+            <fieldset class="comment-fields" [disabled]="commentSaving()">
+              <label for="comment-author">Autor</label>
+              <input id="comment-author" formControlName="author" required maxlength="255" aria-describedby="comment-author-error" />
+              @if (commentForm.controls.author.touched && commentForm.controls.author.invalid) {
+                <p id="comment-author-error" class="error">Informe um autor de até 255 caracteres.</p>
+              }
+              <label for="comment-content">Conteúdo</label>
+              <textarea id="comment-content" formControlName="content" required rows="4" aria-describedby="comment-content-error"></textarea>
+              @if (commentForm.controls.content.touched && commentForm.controls.content.invalid) {
+                <p id="comment-content-error" class="error">Informe um comentário que não contenha apenas espaços.</p>
+              }
+              <button class="primary" type="submit" [disabled]="commentForm.invalid || commentSaving()">{{ commentSaving() ? 'Salvando...' : 'Adicionar comentário' }}</button>
+            </fieldset>
+          </form>
+          @if (commentError()) {
+            <p class="error" role="alert">{{ commentError() }}</p>
+          }
+          @if (commentMessage()) {
+            <p role="status">{{ commentMessage() }}</p>
+          }
+        </section>
       </div>
-      <section class="card history-card" aria-labelledby="history-heading">
-        <div class="card-heading"><h3 id="history-heading">Histórico de status</h3></div>
-        @if (historyLoading()) {
-          <p role="status">Carregando histórico...</p>
-        } @else if (historyError()) {
-          <p class="error" role="alert">{{ historyError() }}</p>
-          <button type="button" (click)="loadHistory()">Tentar carregar histórico novamente</button>
-        } @else if (history().length === 0) {
-          <p>Nenhuma alteração de status registrada.</p>
+      <section class="card timeline-card" aria-labelledby="timeline-heading">
+        <div class="card-heading"><h3 id="timeline-heading">Atividade do incidente</h3></div>
+        @if (timelineLoading()) {
+          <p role="status">Carregando atividade...</p>
+        } @else if (timelineError()) {
+          <p class="error" role="alert">{{ timelineError() }}</p>
+          <button type="button" (click)="loadTimeline()">Tentar carregar atividade novamente</button>
+        } @else if (timeline().length === 0) {
+          <p>Nenhuma atividade registrada.</p>
         } @else {
           <ol class="timeline">
-            @for (entry of history().slice().reverse(); track $index) {
-              <li [attr.data-status]="entry.new_status">
-                <p>{{ entry.previous_status }} → {{ entry.new_status }}</p>
-                <time>{{ entry.changed_at | date: 'dd/MM/yyyy HH:mm:ss' }}</time>
+            @for (entry of timeline(); track entry.type + ':' + entry.id) {
+              <li [attr.data-type]="entry.type" [attr.data-status]="entry.type === 'status_change' ? entry.new_status : null">
+                @if (entry.type === 'status_change') {
+                  <p>Status alterado: {{ entry.previous_status }} → {{ entry.new_status }}</p>
+                } @else {
+                  <p>{{ entry.author }} comentou:</p>
+                  <p class="comment-content">{{ entry.content }}</p>
+                }
+                <time [attr.datetime]="entry.occurred_at">{{ entry.occurred_at | date: 'dd/MM/yyyy HH:mm:ss' }}</time>
               </li>
             }
           </ol>

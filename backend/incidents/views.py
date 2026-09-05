@@ -8,10 +8,12 @@ from rest_framework.views import APIView
 
 from .models import Incident
 from .serializers import (
+    IncidentCommentSerializer,
     IncidentFilterSerializer,
     IncidentSerializer,
     IncidentStatusHistorySerializer,
     IncidentStatusSerializer,
+    IncidentTimelineSerializer,
 )
 from .services import change_incident_status
 
@@ -48,6 +50,42 @@ class IncidentHistoryView(generics.ListAPIView):
     def get_queryset(self):
         incident = get_object_or_404(Incident, pk=self.kwargs['pk'])
         return incident.status_history.order_by('changed_at', 'id')
+
+
+class IncidentCommentListCreateView(generics.ListCreateAPIView):
+    serializer_class = IncidentCommentSerializer
+
+    def get_queryset(self):
+        incident = get_object_or_404(Incident, pk=self.kwargs['pk'])
+        return incident.comments.order_by('created_at', 'id')
+
+    def perform_create(self, serializer):
+        incident = get_object_or_404(Incident, pk=self.kwargs['pk'])
+        serializer.save(incident=incident)
+
+
+class IncidentTimelineView(APIView):
+    def get(self, request, pk):
+        incident = get_object_or_404(Incident, pk=pk)
+        events = [
+            {
+                'id': entry.pk, 'type': 'status_change', 'occurred_at': entry.changed_at,
+                'previous_status': entry.previous_status, 'new_status': entry.new_status,
+            }
+            for entry in incident.status_history.all()
+        ]
+        events.extend(
+            {
+                'id': comment.pk, 'type': 'comment', 'occurred_at': comment.created_at,
+                'author': comment.author, 'content': comment.content,
+            }
+            for comment in incident.comments.all()
+        )
+        # Timestamp ties have a stable order: status changes, then comments, then ID.
+        events.sort(key=lambda event: (
+            event['occurred_at'], event['type'] == 'comment', event['id'],
+        ))
+        return Response(IncidentTimelineSerializer(events, many=True).data)
 
 
 class DashboardView(APIView):

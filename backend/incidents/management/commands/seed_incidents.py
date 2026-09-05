@@ -5,7 +5,7 @@ from incidents.models import Incident
 
 
 class Command(BaseCommand):
-    help = 'Remove todos os incidentes e históricos e recria os três incidentes iniciais.'
+    help = 'Remove todos os incidentes, históricos e comentários e recria os três incidentes iniciais.'
 
     def handle(self, *args, **options):
         records = [
@@ -37,7 +37,7 @@ class Command(BaseCommand):
             for record in records:
                 Incident.objects.create(**record)
 
-        self.stdout.write('Incidentes e históricos anteriores removidos.')
+        self.stdout.write('Incidentes, históricos e comentários anteriores removidos.')
         for record in records:
             self.stdout.write(
                 f"Criado: {record['title']} | {record['severity']} | {record['owner']} | {record['status']}"

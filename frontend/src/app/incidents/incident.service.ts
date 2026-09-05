@@ -5,6 +5,9 @@ import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import {
   ChangeIncidentStatus,
+  CreateIncidentComment,
+  IncidentComment,
+  IncidentTimelineEvent,
   CreateIncident,
   Dashboard,
   Incident,
@@ -42,6 +45,14 @@ export class IncidentService {
 
   getIncidentHistory(id: number): Observable<IncidentStatusHistory[]> {
     return this.http.get<IncidentStatusHistory[]>(`${this.incidentUrl(id)}history/`);
+  }
+
+  createIncidentComment(id: number, data: CreateIncidentComment): Observable<IncidentComment> {
+    return this.http.post<IncidentComment>(`${this.incidentUrl(id)}comments/`, data);
+  }
+
+  getIncidentTimeline(id: number): Observable<IncidentTimelineEvent[]> {
+    return this.http.get<IncidentTimelineEvent[]>(`${this.incidentUrl(id)}timeline/`);
   }
 
   getDashboard(): Observable<Dashboard> {

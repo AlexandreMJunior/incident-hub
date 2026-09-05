@@ -6,6 +6,7 @@ export function apiErrorMessage(error: unknown): string {
   if (error.status === 404) return 'Incidente não encontrado.';
   if (error.status >= 500) return 'O servidor não conseguiu concluir a operação. Tente novamente em instantes.';
   const labels: Record<string, string> = {
+    author: 'Autor', content: 'Conteúdo',
     title: 'Título', description: 'Descrição', severity: 'Severidade', owner: 'Responsável', status: 'Status',
   };
   const body: unknown = error.error;

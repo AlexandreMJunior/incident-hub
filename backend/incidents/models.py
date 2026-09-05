@@ -31,3 +31,12 @@ class IncidentStatusHistory(models.Model):
     previous_status = models.CharField(max_length=11, choices=Incident.Status.choices)
     new_status = models.CharField(max_length=11, choices=Incident.Status.choices)
     changed_at = models.DateTimeField(auto_now_add=True)
+
+
+class IncidentComment(models.Model):
+    incident = models.ForeignKey(
+        Incident, on_delete=models.CASCADE, related_name='comments',
+    )
+    author = models.CharField(max_length=255)
+    content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)

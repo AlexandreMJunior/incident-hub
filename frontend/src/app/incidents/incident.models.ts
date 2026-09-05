@@ -35,3 +35,17 @@ export interface IncidentFilters {
   status?: Status;
   severity?: Severity;
 }
+
+export interface IncidentComment {
+  id: number;
+  author: string;
+  content: string;
+  created_at: string;
+}
+
+export type CreateIncidentComment = Pick<IncidentComment, 'author' | 'content'>;
+
+export type IncidentTimelineEvent = { id: number; occurred_at: string } & (
+  | { type: 'status_change'; previous_status: Status; new_status: Status }
+  | { type: 'comment'; author: string; content: string }
+);

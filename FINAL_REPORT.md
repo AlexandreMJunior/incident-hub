@@ -2,6 +2,8 @@
 
 # Incident Hub — Relatório Final
 
+Os relatos de validação original e redesign abaixo preservam o histórico anterior. A atualização pós-Change Request #1 está identificada na Seção 16 e distingue verificações automáticas de validação manual pendente.
+
 ## 1. O que foi entregue?
 
 Foi entregue uma aplicação web funcional para registro e acompanhamento de incidentes operacionais, composta por frontend Angular e backend Django REST Framework.
@@ -15,6 +17,7 @@ As principais funcionalidades concluídas foram:
 - visualização dos detalhes de um incidente;
 - alteração de status;
 - histórico persistente das alterações de status;
+- comentários persistentes e timeline unificada, adicionados depois pelo Change Request #1 (Seção 16);
 - dashboard com:
   - quantidade de incidentes Open;
   - quantidade de incidentes Critical ainda não resolvidos;
@@ -65,7 +68,7 @@ Também foram entregues:
 
 Não foram implementadas funcionalidades que não faziam parte dos requisitos obrigatórios ou que aumentariam desnecessariamente o escopo da aplicação.
 
-Entre os itens não implementados estão:
+Comentários estavam fora do escopo original, mas foram implementados após o Change Request #1 recebido às 14:00. Entre os itens que continuam não implementados estão:
 
 - autenticação;
 - níveis de permissão;
@@ -74,7 +77,6 @@ Entre os itens não implementados estão:
 - múltiplos tenants;
 - notificações;
 - anexos;
-- comentários;
 - atualizações em tempo real;
 - deploy público;
 - paginação;
@@ -640,3 +642,31 @@ Durante o projeto, meu papel foi principalmente:
 - validar o resultado.
 
 A IA acelerou a produção do software, mas a responsabilidade pelas decisões e pelo resultado permaneceu comigo.
+
+## 16. Atualização após o Change Request #1 — recebido às 14:00
+
+### Entrega e impacto no plano (complemento às respostas 1, 2 e 13)
+
+O requisito de comentários e timeline chegou após a implementação funcional e o redesign. O plano precisou ser reaberto: comentários deixaram de estar fora do escopo e passaram a ser obrigatórios. Foram acrescentadas etapas de modelagem, API, integração Angular, testes e documentação, mantendo o histórico das decisões anteriores no PLAN.md.
+
+Foi implementado `IncidentComment` com vínculo ao incidente, autor obrigatório, conteúdo obrigatório não vazio e timestamp automático, persistido em SQLite por uma migration adicional. A tela de detalhes permite adicionar comentários, informa erros e limpa o formulário após sucesso. A timeline reúne comentários e mudanças de status em ordem cronológica crescente e reutiliza o design atual.
+
+### Decisões e uso de IA (complemento às respostas 4, 7, 9, 10, 14 e 15)
+
+Esta interação adicional com Codex Free foi utilizada para inspecionar a codebase, produzir as alterações de código, migration, testes e documentação e executar as verificações. A mudança foi implementada incrementalmente nos padrões existentes, sem bibliotecas novas ou mudança de stack. O retrabalho concentrou-se na apresentação do histórico e na reabertura do plano e da validação, sem refazer o layout geral.
+
+A decisão foi manter o endpoint `/history/` intacto e adicionar `/comments/` e `/timeline/`. O serviço da regra Critical permaneceu inalterado. A timeline é composta a partir de status e comentários persistidos, sem duplicar registros em uma tabela de eventos. Empates temporais têm ordem determinística (status, comentários e ID). Autor permanece texto simples, sem introduzir autenticação. Comentar não altera status nem `updated_at` do incidente.
+
+### Testes e regressão (complemento às respostas 7, 8 e 11)
+
+O Codex executou a suíte pós-mudança: **34 testes passaram**, sendo 8 novos testes de comentários/timeline e os 26 testes anteriores, com ampliação dos testes de seed. A cobertura nova inclui criação, leitura persistida no incidente correto, validação de campos, espaços, múltiplos comentários, isolamento, timeline mista ordenada, empates, 404 e preservação da regra Critical e do histórico. Os testes de seed também verificam remoção e restauração de comentários em rollback.
+
+`python manage.py check` passou; `python manage.py makemigrations --check --dry-run` não detectou alterações; `python manage.py migrate` aplicou `0002_incidentcomment`; `npm run build` passou. Não houve falha nessas verificações. A suíte automatizada não apontou regressão nos endpoints antigos, filtros, dashboard, criação, status, histórico ou seed.
+
+Não foi realizada validação manual pós-Change Request pelo agente nem recebida confirmação do usuário. Portanto, os relatos anteriores de regressão manual bem-sucedida não se estendem automaticamente a esta mudança.
+
+### Riscos e próximos passos (complemento às respostas 11 e 12)
+
+Permanecem pendentes a revisão no navegador do formulário e mensagens de erro, comentários intercalados com status, conteúdo longo/multilinha, responsividade, refresh e reinicialização do backend sem seed, além da repetição dos fluxos anteriores. O frontend continua sem suíte automatizada de componentes; build comprova compilação, não comportamento integrado.
+
+A timeline carrega os eventos em memória sem paginação, coerente com uso local e pequeno volume. O seed continua um reset explícito e remove comentários por cascata; seu comportamento foi testado em banco de testes, sem resetar os dados locais. A migration adicional foi aplicada sem alterar tabelas ou contratos anteriores. A implementação automática está concluída; o aceite manual desta nova etapa permanece pendente.

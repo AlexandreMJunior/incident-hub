@@ -1408,3 +1408,42 @@ A utilização do Lovable foi registrada neste `AI_LOG.md` por ter influenciado 
 Os limites disponíveis nas modalidades gratuitas foram tratados como uma restrição real do desenvolvimento e influenciaram decisões como o agrupamento de algumas tarefas relacionadas.
 
 As conversas e interações relevantes utilizadas durante o desenvolvimento foram preservadas para eventual auditoria.
+
+# 19. Change Request #1 — comentários e timeline (recebido às 14:00)
+
+## Ferramenta
+
+Codex Free.
+
+## Objetivo
+
+Implementar Change Request #1, preservando a arquitetura e todos os requisitos anteriores.
+
+## Contexto
+
+A mudança chegou depois da implementação original e do redesign e exigiu replanejamento. Comentários estavam fora do escopo inicial; passaram a ser obrigatórios. O plano foi reaberto para incluir persistência de comentários, timeline consolidada, testes adicionais e nova validação de regressão.
+
+## Instrução
+
+Inspecionar a implementação antes de editar; seguir os padrões Django/DRF e Angular; exigir autor/conteúdo não vazios; persistir comentários; reunir status e comentários em ordem cronológica na tela de detalhes; manter contratos anteriores, regra Critical, seed e tratamento de erros; atualizar os quatro documentos sem inventar validações.
+
+## Resultado
+
+Implementados `IncidentComment`, migration `0002_incidentcomment`, serializers, listagem/criação de comentários e endpoint de timeline. O frontend ganhou formulário reativo e diferenciação visual dos eventos no card existente. Foram criados 8 testes de comentários/timeline e ampliados testes de seed. PLAN, README e FINAL_REPORT foram atualizados preservando a evolução anterior.
+
+## Validação
+
+Execução pelo Codex após a mudança: `python manage.py test` passou com 34 testes; `python manage.py check` sem problemas; `python manage.py makemigrations --check --dry-run` sem alterações; `python manage.py migrate` aplicou a migration nova; `npm run build` passou. Essas são verificações executadas pelo agente, não uma confirmação de testes manuais pelo usuário.
+
+Validação manual pós-Change Request pendente: formulário, falhas HTTP, timeline intercalada, responsividade, refresh/reinício e regressão dos fluxos existentes. As validações manuais anteriores continuam registradas como anteriores à mudança.
+
+## Decisões e ajustes
+
+- Preservar `/history/` e adicionar `/comments/` e `/timeline/`, evitando alterar o contrato anterior.
+- Compor a timeline a partir das tabelas existentes, sem criar tabela de eventos duplicada ou arquitetura paralela.
+- Trocar a exibição anterior do histórico, que invertia a lista, por ordem cronológica crescente. Empates usam tipo e ID, com status antes de comentários.
+- Reutilizar validações de formulários e mensagens de erro existentes; adicionar rótulos de autor e conteúdo.
+- Manter autor como texto simples e não alterar status/updated_at ao comentar.
+- Ampliar os testes de seed para verificar cascata e restauração dos comentários em rollback; atualizar a descrição do reset. O seed não foi executado no banco local para preservar os dados existentes.
+- Não houve falha nos comandos de validação executados nesta implementação nem abordagem implementada e posteriormente abandonada. A escolha por endpoints adicionais foi tomada na inspeção para preservar compatibilidade.
+- Código e lógica desta mudança foram produzidos pela IA, sem novas dependências e com tags novas mantidas compactas.

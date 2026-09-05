@@ -75,9 +75,11 @@ Somente após o escopo obrigatório estar implementado, testado e documentado:
 - Adicionar indicadores visuais para severidade e status (badges).
 - Adicionar estados de carregamento ou vazio, quando fizer sentido.
 
-### 5.3 Fora de escopo
+### 5.3 Fora de escopo no planejamento original
 
 Autenticação, cadastro de usuários, recuperação de senha, permissões, organizações/multi-tenant, comentários, anexos, notificações, atualização em tempo real, gráficos, busca textual, paginação sem necessidade, deploy público, infraestrutura complexa, bibliotecas pesadas, abstrações sem benefício claro e qualquer regra de negócio não solicitada.
+
+Atualização às 14:00: comentários passaram a ser obrigatórios com o Change Request #1, detalhado na Seção 28. A lista acima preserva a decisão inicial; as demais exclusões continuam válidas.
 
 Controlar o escopo é uma decisão de engenharia, não uma omissão. Cada item excluído reduz superfície de risco, reduz tempo de configuração e testes, e mantém o foco no requisito obrigatório, preservando a confiabilidade da entrega dentro do tempo disponível de um hackathon de um dia.
 
@@ -412,3 +414,51 @@ A finalização (Etapa 10) inclui: atualização de `README.md`, `PLAN.md`, `AI_
 **Correção → Completude → Simplicidade → Confiabilidade → Extras.**
 
 Toda decisão registrada neste plano — da escolha de stack ao momento de iniciar o redesign visual — é subordinada a essa ordem de prioridade. Funcionalidades adicionais e melhorias de aparência somente foram consideradas depois que os requisitos obrigatórios estavam implementados, testados e validados de ponta a ponta.
+
+## 28. Change Request #1 — recebido às 14:00
+
+### Mudança de escopo e replanejamento
+
+O requisito chegou depois da implementação funcional original e do redesign. Comentários estavam explicitamente fora do escopo inicial e agora passam a ser obrigatórios, junto com uma timeline unificada. As etapas e validações anteriores ficam preservadas como histórico; não comprovam a validação manual desta nova entrega. A finalização foi reaberta para implementar, testar e documentar a mudança antes de um novo aceite.
+
+A arquitetura permanece Angular → IncidentService → DRF → SQLite. Foram inspecionados modelos, serializers, services, views, URLs, seed, migrations, testes e componentes antes da alteração. O histórico existente e o serviço `change_incident_status` são preservados. Não há alteração em autenticação, permissões, rotas Angular ou bibliotecas.
+
+### Decomposição adicional
+
+1. Inspecionar a implementação e definir contratos aditivos, preservando `/history/`.
+2. Criar `IncidentComment`, associado a `Incident`, com autor, conteúdo e timestamp; gerar migration `0002_incidentcomment`.
+3. Adicionar serializer e `GET/POST /api/incidents/<id>/comments/`; agregar eventos em `GET /api/incidents/<id>/timeline/`.
+4. Adaptar detalhes Angular com formulário reativo, feedback da API e timeline crescente, reutilizando o visual existente.
+5. Criar testes de comentários/timeline e ampliar testes de seed; executar toda a suíte anterior, check, verificação de migrations e build.
+6. Atualizar documentação e repetir validação manual integrada antes do aceite final.
+
+### Critérios de aceite e matriz de rastreabilidade adicional
+
+| Requisito | Componente | Critério de aceite | Verificação |
+|---|---|---|---|
+| Comentário válido | IncidentComment + serializer + comments/ | Autor e conteúdo persistidos no incidente da URL; timestamp do servidor | test_create_persists_comment_on_correct_incident |
+| Campos obrigatórios | Serializer + formulário Angular | Ausentes, nulos, vazios ou espaços rejeitados; autor até 255 caracteres | test_required_and_nonblank_fields; test_author_length_and_whitespace_trimming; manual pendente |
+| Múltiplos comentários | Relação comments + endpoint | Vários registros, ordenados, sem vazamento entre incidentes | test_multiple_comments_are_ordered_and_scoped |
+| Timeline unificada | IncidentTimelineView + detalhes Angular | Status e comentários juntos em ordem crescente, com dados próprios de cada tipo | test_timeline_combines_events_chronologically_and_preserves_history; manual pendente |
+| Empate temporal | Ordenação da timeline | Timestamp, tipo (status antes de comentário) e ID determinísticos | test_timeline_timestamp_ties_are_deterministic |
+| Feedback e atualização | Formulário de comentários | Impedir envio inválido/duplicado durante envio, mostrar erros, limpar após sucesso e recarregar timeline | Build passou; navegador pendente |
+| Persistência | Migration + SQLite | Registro lido novamente por HTTP; mantido após refresh/reinício sem seed | Teste de API passou; refresh/reinício manual pendente |
+| Compatibilidade | Endpoints antigos + serviço de status | Contratos antigos e regra Critical preservados | Suíte original + test_comment_does_not_bypass_critical_rule |
+| Seed | Cascata de IncidentComment + comando transacional | Reset mantém os três incidentes e remove comentários; falha restaura registros | test_seed.py ampliado |
+
+### Riscos e decisões
+
+| Risco | Mitigação / decisão |
+|---|---|
+| Quebra de consumidores do histórico | Manter `/history/` intacto e criar endpoint adicional |
+| Eventos com mesmo horário ou IDs iguais entre tabelas | Desempate determinístico e identidade visual type + id |
+| Perda de comentários ao resetar seed | Cascata intencional documentada; testes de reset e rollback; seed não foi executado sobre os dados locais nesta mudança |
+| Formulário ou layout com regressão | Reusar padrões atuais; build executado; validação manual pendente |
+| Crescimento da timeline | Composição em memória sem paginação, adequada ao escopo local; reavaliar para volumes maiores |
+| Autor sem identidade verificada | Autor em texto simples, coerente com a ausência de autenticação; sem ampliar escopo |
+
+### Estratégia de testes e estado pós-mudança
+
+Foram adicionados 8 testes em `test_comments.py` e ampliados os testes existentes de seed para comentários e rollback. A suíte completa executada pelo Codex passou com **34 testes**, incluindo os 26 anteriores. `python manage.py check` passou, `makemigrations --check --dry-run` não detectou divergências, `migrate` aplicou `0002_incidentcomment` e `npm run build` passou.
+
+A validação manual pós-Change Request permanece pendente: adicionar comentários intercalados com status, testar mensagens de erro e campos inválidos, verificar timeline, refresh e reinício sem seed, repetir criação/listagem/filtros/detalhes/dashboard/regra Critical e revisar telas pequenas. O build não substitui essa validação. A mudança está implementada e validada automaticamente; o gate de aceite manual ainda não foi concluído.
